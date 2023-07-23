@@ -1,0 +1,101 @@
+const post = require("../models/post");
+const fs = require("fs");
+
+const createPost = async (req, res) => {
+  try {
+    const id = req.user.id;
+    const { originalname, path } = req.file;
+    const parts = originalname.split(".");
+    const ext = parts[parts.length - 1];
+    const newPath = path + "." + ext;
+    fs.renameSync(path, newPath);
+
+    const { title, summary, description } = req.body;
+
+    await post.create({
+      title,
+      summary,
+      description,
+      cover: newPath,
+      author: id,
+    });
+
+    res
+      .status(201)
+      .send({ status: true, message: "Post Created Successfully." });
+  } catch (error) {
+    res.send({ status: false, message: "Error in Create post api" });
+  }
+};
+
+const editPost = async (req, res) => {
+  try {
+    const postCreatorId = req.user.id;
+    const postId = req.params.id;
+
+    let newPath = "";
+
+    if (req.file) {
+      const { originalname, path } = req.file;
+      const parts = originalname.split(".");
+      const ext = parts[parts.length - 1];
+      newPath = path + "." + ext;
+      fs.renameSync(path, newPath);
+    }
+    const { title, summary, description } = req.body;
+
+    const postdoc = await post.findById({ _id: postId });
+
+    const isAuthor =
+      JSON.stringify(postCreatorId) === JSON.stringify(postdoc.author);
+
+    if (!isAuthor) {
+      return res
+        .status(200)
+        .send({ status: false, message: "You are not author of this post." });
+    }
+
+    await post.findByIdAndUpdate(
+      { _id: postId },
+      {
+        title,
+        summary,
+        description,
+        cover: newPath ? newPath : postdoc.cover,
+        author: postCreatorId,
+      }
+    );
+
+    res
+      .status(201)
+      .send({ status: true, message: "Post Updated Successfully." });
+  } catch (error) {
+    res.send({ status: false, message: "Error in update post api" });
+  }
+};
+
+const allPost = async (req, res) => {
+  try {
+    const posts = await post
+      .find()
+      .populate("author", ["userName"])
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    res.send({ status: true, message: "...", posts });
+  } catch (error) {
+    res.send({ status: false, message: "Error in all post api." });
+  }
+};
+
+const singlePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const singlePost = await post.findById(id).populate("author", ["userName"]);
+    res.send({ status: true, message: "...", post: singlePost });
+  } catch (error) {
+    res.send({ status: false, message: "Error in single post api." });
+  }
+};
+
+module.exports = { createPost, editPost, allPost, singlePost };

@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const userAuth = async (req, res, next) => {
   try {
     // const { token } = req.cookies;
-
     const token = req.header("Authorization");
     const jwtData = jwt.verify(token, process.env.SECRET_KEY);
     req.user = jwtData;

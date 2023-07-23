@@ -69,7 +69,7 @@ const userLogin = async (req, res, next) => {
           { expiresIn: "1d" }
         );
         res
-          .cookie("token", token)
+          .cookie("token", token ,  { maxAge: 900000, httpOnly: true })
           .send({ status: true, message: "Login successful", user: existingUser });
       }
     }

@@ -16,9 +16,10 @@ const port = process.env.PORT || 8000;
 //connect db
 connectDb(dbUrl)
 
+const originURLs = ["http://localhost:3000","https://manish7479dlp-blog.netlify.app"]
 //middleware
 app.use(express.json());
-app.use(cors({origin: "http://localhost:3000" , credentials: true}))
+app.use(cors({origin: originURLs , credentials: true}))
 app.use(cookieParser());
 app.use("/uploads" , express.static(__dirname + '/uploads'))
 

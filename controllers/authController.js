@@ -70,7 +70,7 @@ const userLogin = async (req, res, next) => {
         );
         res
           .cookie("token", token ,  { maxAge: 900000, httpOnly: true })
-          .send({ status: true, message: "Login successful", user: existingUser });
+          .send({ status: true, message: "Login successful", user: existingUser , token });
       }
     }
   } catch (error) {

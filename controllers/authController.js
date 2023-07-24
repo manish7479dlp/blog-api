@@ -56,7 +56,7 @@ const userLogin = async (req, res, next) => {
     const existingUser = await user.findOne({ userName });
 
     if (!existingUser) {
-      res.status(404).send("Invalid Credential.");
+      res.status(404).send({ status: false, message: "Invalid Credential." });
     } else {
       const isMatch = await bcrypt.compare(password, existingUser.password);
 

@@ -55,6 +55,12 @@ const editPost = async (req, res) => {
         .send({ status: false, message: "You are not author of this post." });
     }
 
+    if(newPath) {
+      fs.unlinkSync(postdoc.cover);
+    }
+
+
+
     await post.findByIdAndUpdate(
       { _id: postId },
       {

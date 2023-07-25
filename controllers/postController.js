@@ -55,11 +55,9 @@ const editPost = async (req, res) => {
         .send({ status: false, message: "You are not author of this post." });
     }
 
-    if(newPath) {
+    if (newPath) {
       fs.unlinkSync(postdoc.cover);
     }
-
-
 
     await post.findByIdAndUpdate(
       { _id: postId },
@@ -117,4 +115,27 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = { createPost, editPost, allPost, singlePost, deletePost };
+const getAllPostOfUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const allPost = await post.find({ author: id });
+    console.log(allPost);
+    res.send({
+      status: true,
+      message: "...",
+      post: allPost,
+      postCount: allPost.length,
+    });
+  } catch (error) {
+    res.send({ status: false, message: "Error in AllPostOfUser post api." });
+  }
+};
+
+module.exports = {
+  createPost,
+  editPost,
+  allPost,
+  singlePost,
+  deletePost,
+  getAllPostOfUser,
+};

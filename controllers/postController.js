@@ -101,18 +101,10 @@ const singlePost = async (req, res) => {
 const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
+    const deletingPost = await post.findById({ _id: id });
+    const cover = deletingPost.cover;
+    fs.unlinkSync(cover);
     const deletedPost = await post.findByIdAndRemove({ _id: id });
-    const cover = deletedPost.cover;
-    fs.unlink(cover, function (error) {
-      if (error) {
-        res.send({
-          status: false,
-          message: "Error in delete post api.",
-          error,
-        });
-      }
-    });
-
     res.send({ status: true, message: "Post deleted successfully." });
   } catch (error) {
     res.send({ status: false, message: "Error in delete post api." });

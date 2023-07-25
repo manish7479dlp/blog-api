@@ -119,7 +119,6 @@ const getAllPostOfUser = async (req, res) => {
   try {
     const { id } = req.params;
     const allPost = await post.find({ author: id });
-    console.log(allPost);
     res.send({
       status: true,
       message: "...",

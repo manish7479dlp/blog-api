@@ -1,5 +1,5 @@
 const express = require("express");
-const { userRegistration, userLogin, userProfile, userLogout } = require("../controllers/authController");
+const { userRegistration, userLogin, userProfile, userLogout, userUpdate } = require("../controllers/authController");
 const authMiddleware = require("../middleware/authMiddleware")
 
 //api routes
@@ -16,7 +16,9 @@ route.get("/user" , authMiddleware , userProfile)
 
 //user logout
 
-route.get("/user/logout",authMiddleware , userLogout)
+route.get("/user/logout",authMiddleware , userLogout);
+
+route.put("/user/update" , authMiddleware , userUpdate);
 
 
 module.exports = route;

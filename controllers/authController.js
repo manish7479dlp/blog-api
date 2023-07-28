@@ -68,9 +68,12 @@ const userLogin = async (req, res, next) => {
           process.env.SECRET_KEY,
           { expiresIn: "1d" }
         );
-        res
-          .cookie("token", token ,  { maxAge: 900000, httpOnly: true })
-          .send({ status: true, message: "Login successful", user: existingUser , token });
+        res.cookie("token", token, { maxAge: 900000, httpOnly: true }).send({
+          status: true,
+          message: "Login successful",
+          user: existingUser,
+          token,
+        });
       }
     }
   } catch (error) {
@@ -80,17 +83,19 @@ const userLogin = async (req, res, next) => {
 
 const userLogout = async (req, res) => {
   try {
-    res.cookie('token' , '').send({status: true , message : "Logout Successful."})
+    res
+      .cookie("token", "")
+      .send({ status: true, message: "Logout Successful." });
   } catch (error) {
-    console.log(error)
-    res.send({status: false , message: "Error occur in user logout api."})
+    console.log(error);
+    res.send({ status: false, message: "Error occur in user logout api." });
   }
 };
 const userProfile = async (req, res, next) => {
   try {
-    const {id} = req.user
+    const { id } = req.user;
     const userDoc = await user.findById({ _id: id });
-    res.status(200).send({ status: true, message: "..." , user : userDoc });
+    res.status(200).send({ status: true, message: "...", user: userDoc });
   } catch (error) {
     res
       .status(505)
@@ -98,12 +103,64 @@ const userProfile = async (req, res, next) => {
   }
 };
 
-const getProfile = async(req , res , next) => {
+const getProfile = async (req, res, next) => {
   try {
-    
   } catch (error) {
-    res.send({status: false , message: "Error in profile api.", error})
+    res.send({ status: false, message: "Error in profile api.", error });
   }
-}
+};
 
-module.exports = { userRegistration, userLogin, userLogout, userProfile };
+const userUpdate = async (req, res) => {
+  try {
+    console.log("userName")
+    const { userName, password, email } = req.body;
+    const { id } = req.user;
+
+
+    // all fields check.
+    if (!email) {
+      res.send({ status: false, message: "Email is required." });
+    } else if (!userName) {
+      res.send({ status: false, message: "UserName is required." });
+    }
+
+    if (password) {
+      const salt = 10;
+      const hashPassword = await bcrypt.hash(password, salt);
+      await user.findByIdAndUpdate(
+        { _id: id },
+        {
+          email,
+          userName,
+          password: hashPassword,
+        }
+      );
+    } else {
+      await user.findByIdAndUpdate(
+        { _id: id },
+        {
+          email,
+          userName,
+        }
+      );
+    }
+
+    res
+      .status(201)
+      .send({ status: true, message: "User Update successfully." });
+  } catch (error) {
+    res.send({
+      status: false,
+      message: "Error occurs in user-Updation",
+      error,
+    });
+  }
+};
+
+module.exports = {
+  userRegistration,
+  userLogin,
+  userLogout,
+  userProfile,
+  userUpdate,
+};

@@ -21,7 +21,8 @@ const originURLs = ["http://localhost:3000","https://manish7479dlp-blog.netlify.
 app.use(express.json());
 app.use(cors({origin: originURLs , credentials: true}))
 app.use(cookieParser());
-app.use("/uploads" , express.static(__dirname + '/uploads'))
+// app.use("/uploads" , express.static(__dirname + '/uploads'))
+app.use(express.static("public"))
 
 
 //routes

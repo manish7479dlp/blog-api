@@ -1,22 +1,25 @@
 const post = require("../models/post");
 const fs = require("fs");
-
+const uploadOnCloudinary = require("../utils/uploadOnCloudinary")
 const createPost = async (req, res) => {
   try {
     const id = req.user.id;
-    const { originalname, path } = req.file;
-    const parts = originalname.split(".");
-    const ext = parts[parts.length - 1];
-    const newPath = path + "." + ext;
-    fs.renameSync(path, newPath);
-
+   
     const { title, summary, description } = req.body;
+
+    const imgLocalPath = req.file?.path;
+
+    const image = await uploadOnCloudinary(imgLocalPath)
+  
+    if (!image) {
+      res.send({ status: false, message: "Image not found" });
+    }
 
     await post.create({
       title,
       summary,
       description,
-      cover: newPath,
+      cover: image?.url,
       author: id,
     });
 
@@ -34,13 +37,12 @@ const editPost = async (req, res) => {
     const postId = req.params.id;
 
     let newPath = "";
-
+    let image = ""
     if (req.file) {
-      const { originalname, path } = req.file;
-      const parts = originalname.split(".");
-      const ext = parts[parts.length - 1];
-      newPath = path + "." + ext;
-      fs.renameSync(path, newPath);
+     const  imgLocalPath = req.file?.path;
+
+       image = await uploadOnCloudinary(imgLocalPath)
+    
     }
     const { title, summary, description } = req.body;
 
@@ -55,9 +57,6 @@ const editPost = async (req, res) => {
         .send({ status: false, message: "You are not author of this post." });
     }
 
-    if (newPath) {
-      fs.unlinkSync(postdoc.cover);
-    }
 
     await post.findByIdAndUpdate(
       { _id: postId },
@@ -65,7 +64,7 @@ const editPost = async (req, res) => {
         title,
         summary,
         description,
-        cover: newPath ? newPath : postdoc.cover,
+        cover: newPath ? image?.url : postdoc.cover,
         author: postCreatorId,
       }
     );
@@ -107,7 +106,7 @@ const deletePost = async (req, res) => {
     const { id } = req.params;
     const deletingPost = await post.findById({ _id: id });
     const cover = deletingPost.cover;
-    fs.unlinkSync(cover);
+    
     const deletedPost = await post.findByIdAndRemove({ _id: id });
     res.send({ status: true, message: "Post deleted successfully." });
   } catch (error) {

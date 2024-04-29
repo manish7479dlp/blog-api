@@ -1,4 +1,5 @@
 const cloudinary = require("cloudinary").v2;
+const fs = require("fs");
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -16,6 +17,8 @@ const uploadOnCloudinary = async (imgPath) => {
     return response;
   } catch (error) {
     console.log("Error in uploadOnCloudinary utility function: ", error);
+  } finally {
+    fs.unlinkSync(imgPath);
   }
 };
 

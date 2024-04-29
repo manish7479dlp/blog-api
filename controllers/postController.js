@@ -4,6 +4,8 @@ const {
   uploadOnCloudinary,
   deleteFromCloudinary,
 } = require("../utils/cloudinary");
+const { getPublicKeyOfImage } = require("../utils/helper");
+const { resolveNaptr } = require("dns");
 const createPost = async (req, res) => {
   try {
     const id = req.user.id;
@@ -39,13 +41,22 @@ const editPost = async (req, res) => {
     const postCreatorId = req.user.id;
     const postId = req.params.id;
 
-    let newPath = "";
     let image = "";
     if (req.file) {
       const imgLocalPath = req.file?.path;
-
+      const updatedPost = await post.findById(postId);
+      const publicKey = getPublicKeyOfImage(updatedPost?.cover);
+      console.log(publicKey);
+      const deletedResponse = deleteFromCloudinary(publicKey);
+      if (!deletedResponse) {
+        return res.send({
+          status: false,
+          message: "something went wrong during deleting image",
+        });
+      }
       image = await uploadOnCloudinary(imgLocalPath);
     }
+
     const { title, summary, description } = req.body;
 
     const postdoc = await post.findById({ _id: postId });
@@ -65,7 +76,7 @@ const editPost = async (req, res) => {
         title,
         summary,
         description,
-        cover: newPath ? image?.url : postdoc.cover,
+        cover: image ? image?.secure_url : postdoc.cover,
         author: postCreatorId,
       }
     );

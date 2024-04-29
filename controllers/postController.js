@@ -5,7 +5,6 @@ const {
   deleteFromCloudinary,
 } = require("../utils/cloudinary");
 const { getPublicKeyOfImage } = require("../utils/helper");
-const { resolveNaptr } = require("dns");
 const createPost = async (req, res) => {
   try {
     const id = req.user.id;

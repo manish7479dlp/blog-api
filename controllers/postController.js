@@ -118,6 +118,14 @@ const deletePost = async (req, res) => {
     const { id } = req.params;
     const deletingPost = await post.findById({ _id: id });
     const cover = deletingPost.cover;
+    const publicKey = getPublicKeyOfImage(cover);
+    const deletedResponse = deleteFromCloudinary(publicKey);
+    if (!deletedResponse) {
+      return res.send({
+        status: false,
+        message: "something went wrong during deleting image",
+      });
+    }
 
     const deletedPost = await post.findByIdAndRemove({ _id: id });
     res.send({ status: true, message: "Post deleted successfully." });

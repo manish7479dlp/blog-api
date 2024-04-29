@@ -13,7 +13,6 @@ const createPost = async (req, res) => {
     const imgLocalPath = req.file?.path;
 
     const image = await uploadOnCloudinary(imgLocalPath);
-    console.log(image);
 
     if (!image) {
       return res.send({ status: false, message: "Image not found" });

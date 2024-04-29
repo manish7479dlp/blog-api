@@ -1,25 +1,29 @@
 const post = require("../models/post");
 const fs = require("fs");
-const uploadOnCloudinary = require("../utils/uploadOnCloudinary")
+const {
+  uploadOnCloudinary,
+  deleteFromCloudinary,
+} = require("../utils/cloudinary");
 const createPost = async (req, res) => {
   try {
     const id = req.user.id;
-   
+
     const { title, summary, description } = req.body;
 
     const imgLocalPath = req.file?.path;
 
-    const image = await uploadOnCloudinary(imgLocalPath)
-  
+    const image = await uploadOnCloudinary(imgLocalPath);
+    console.log(image);
+
     if (!image) {
-      res.send({ status: false, message: "Image not found" });
+      return res.send({ status: false, message: "Image not found" });
     }
 
     await post.create({
       title,
       summary,
       description,
-      cover: image?.url,
+      cover: image?.secure_url,
       author: id,
     });
 
@@ -27,7 +31,7 @@ const createPost = async (req, res) => {
       .status(201)
       .send({ status: true, message: "Post Created Successfully." });
   } catch (error) {
-    res.send({ status: false, message: "Error in Create post api" });
+    res.send({ status: false, message: "Error in Create post api: " + error });
   }
 };
 
@@ -37,12 +41,11 @@ const editPost = async (req, res) => {
     const postId = req.params.id;
 
     let newPath = "";
-    let image = ""
+    let image = "";
     if (req.file) {
-     const  imgLocalPath = req.file?.path;
+      const imgLocalPath = req.file?.path;
 
-       image = await uploadOnCloudinary(imgLocalPath)
-    
+      image = await uploadOnCloudinary(imgLocalPath);
     }
     const { title, summary, description } = req.body;
 
@@ -56,7 +59,6 @@ const editPost = async (req, res) => {
         .status(200)
         .send({ status: false, message: "You are not author of this post." });
     }
-
 
     await post.findByIdAndUpdate(
       { _id: postId },
@@ -106,7 +108,7 @@ const deletePost = async (req, res) => {
     const { id } = req.params;
     const deletingPost = await post.findById({ _id: id });
     const cover = deletingPost.cover;
-    
+
     const deletedPost = await post.findByIdAndRemove({ _id: id });
     res.send({ status: true, message: "Post deleted successfully." });
   } catch (error) {

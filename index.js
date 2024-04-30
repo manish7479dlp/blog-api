@@ -17,7 +17,7 @@ connectDb(dbUrl);
 
 const originURLs = [
   "http://localhost:3000",
-  "https://manish7479dlp-blog.netlify.app",
+  "https://manish7479dlp-bloggie.netlify.app",
 ];
 //middleware
 app.use(cors({ origin: originURLs, credentials: true }));
